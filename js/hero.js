@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { constellation } from './constellation.js?v=69';
+import { constellation } from './constellation.js?v=70';
 
 const canvas = document.querySelector('canvas[data-stars]');
 if (canvas) start(canvas);

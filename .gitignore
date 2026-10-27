@@ -1,0 +1,14 @@
+# Original 2x captures and PDFs; the site uses assets/img/*.webp
+assets/quicknotes/
+assets/responsagility/
+.impeccable/review/
+.DS_Store
+tools/capture/
+handoffs/
+# Claude and design files, not part of the site
+.claude/
+.impeccable/
+.annotated/
+DESIGN.md
+PRODUCT.md
+tools/

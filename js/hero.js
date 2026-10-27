@@ -3,7 +3,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { constellation } from './constellation.js?v=68';
+import { constellation } from './constellation.js?v=69';
 
 const canvas = document.querySelector('canvas[data-stars]');
 if (canvas) start(canvas);
@@ -106,7 +106,7 @@ function start(canvas) {
   function size() {
     w = document.documentElement.clientWidth; h = innerHeight;
 
-    stopY = Math.max(1, head ? head.getBoundingClientRect().top + scrollY - 140 : h * 1.6);
+    stopY = Math.max(1, head ? head.getBoundingClientRect().top + scrollY - 140 * parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 : h * 1.6);
     fadeStart = Math.min(h * 0.25, stopY * 0.5);
     renderer.setSize(w, h, false);
     composer.setSize(w, h);

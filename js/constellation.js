@@ -35,7 +35,8 @@ const FIGURES = {
     note: 'The master hands candidate moves to workers over MPI'
   }
 };
-const MAX_NODES = 10, DUST = 420, DUST_GAP = 8;
+const MAX_NODES = 10, DUST = 600, DUST_GAP = 8;
+const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize) / 16;
 
 export function constellation({ composer, disc, reduce, wake }) {
   const wide = matchMedia('(min-width: 1200px)');
@@ -78,17 +79,18 @@ export function constellation({ composer, disc, reduce, wake }) {
   labels.setAttribute('aria-hidden', 'true');
   document.body.appendChild(labels);
 
-  let w = 0, h = 0, box = null, current = null;
+  let w = 0, h = 0, u = 1, box = null, current = null, light = false;
   let anchor = scrollY;
 
   function measure() {
-    w = document.documentElement.clientWidth; h = innerHeight;
+    w = document.documentElement.clientWidth; h = innerHeight; u = rem();
     camera.right = w; camera.bottom = h; camera.updateProjectionMatrix();
     const wrap = work.querySelector('.wrap'), r = wrap.getBoundingClientRect();
     const gap = parseFloat(getComputedStyle(wrap).columnGap) || 48;
     const x0 = r.left + (r.width - gap) * 0.58 + gap, x1 = r.right;
-    const bw = x1 - x0, bh = Math.min(bw * 0.95, h - 88 - 200);
-    box = { x: x0, y: 88 + (h - 88 - bh) / 2 + 12, w: bw, h: bh };
+    const bw = x1 - x0, bh = Math.min(bw * 0.95, h - 288 * u);
+    box = { x: x0, y: 88 * u + (h - 88 * u - bh) / 2 + 12 * u, w: bw, h: bh };
+    sizes();
   }
 
   function scatter(q) {
@@ -113,9 +115,11 @@ export function constellation({ composer, disc, reduce, wake }) {
       const N = [], D = [];
       const at = {};
       for (const [id, x, y, text, a = 1] of fig.nodes) { at[id] = [box.x + x * box.w, box.y + y * box.h]; N.push([...at[id], a, text]); }
+      const span = ([a, b]) => Math.hypot(at[b][0] - at[a][0], at[b][1] - at[a][1]);
+      const gap = Math.max(DUST_GAP * u, fig.edges.reduce((s, e) => s + span(e), 0) / (DUST - fig.edges.length));
       for (const [a, b, bright = 1] of fig.edges) {
         const [ax, ay] = at[a], [bx, by] = at[b], len = Math.hypot(bx - ax, by - ay);
-        const k = Math.max(2, Math.floor(len / DUST_GAP)), nx = -(by - ay) / len, ny = (bx - ax) / len;
+        const k = Math.max(2, Math.floor(len / gap)), nx = -(by - ay) / len, ny = (bx - ax) / len;
         for (let j = 1; j < k; j++) {
           const t = j / k, jitter = (Math.random() - 0.5) * 2.4;
           D.push([ax + (bx - ax) * t + nx * jitter, ay + (by - ay) * t + ny * jitter, (0.6 + Math.random() * 0.4) * bright]);
@@ -128,9 +132,9 @@ export function constellation({ composer, disc, reduce, wake }) {
       const top = Math.min(...ys), bottom = Math.max(...ys), mid = (Math.min(...xs) + Math.max(...xs)) / 2;
       const add = (cls, x, y, ...parts) => { const s = document.createElement('span'); s.className = cls; s.style.left = x + 'px'; s.style.top = y + 'px'; s.append(...parts); labels.appendChild(s); return s; };
       const title = document.createElement('b'); title.textContent = fig.title;
-      const made = [add('label cap', mid, top - 72, 'SYSTEM::', title)];
-      for (const [x, y, , text] of N) if (text) made.push(add('node', x, y + (y - top < 30 ? -30 : 16), text));
-      const note = add('note', mid, bottom + 60, fig.note);
+      const made = [add('label cap', mid, top - 72 * u, 'SYSTEM::', title)];
+      for (const [x, y, , text] of N) if (text) made.push(add('node', x, y + (y - top < 30 * u ? -30 * u : 16 * u), text));
+      const note = add('note', mid, bottom + 60 * u, fig.note);
       note.style.maxWidth = box.w + 'px';
       made.push(note);
       setTimeout(() => made.forEach(s => s.classList.add('on')), reduce ? 0 : 450);
@@ -175,11 +179,15 @@ export function constellation({ composer, disc, reduce, wake }) {
     return moving;
   }
 
-  function theme(light) {
+  function sizes() { nodes.mat.size = (light ? 14 : 9) * u; dust.mat.size = (light ? 6 : 3.2) * u; }
+
+  function theme(on) {
+    light = on;
     rgb = light ? [new THREE.Color('#111111'), new THREE.Color('#1a4fb8')] : [new THREE.Color('#ffffff'), new THREE.Color('#8fcaff')];
     boost = light ? 1.3 : 1;
 
-    [[nodes, light ? 14 : 9], [dust, light ? 6 : 3.2]].forEach(([L, size]) => { L.mat.map = light ? ink : disc; L.mat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending; L.mat.size = size; L.mat.needsUpdate = true; });
+    [nodes, dust].forEach(L => { L.mat.map = light ? ink : disc; L.mat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending; L.mat.needsUpdate = true; });
+    sizes();
     wake();
   }
 

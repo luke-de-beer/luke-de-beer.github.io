@@ -3,7 +3,7 @@ import { animate, inView, stagger } from 'motion';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const lenis = new Lenis({ autoRaf: true, anchors: { offset: document.querySelector('.case-nav') ? -60 : -96 }, lerp: 0.085 });
+const lenis = new Lenis({ autoRaf: true, anchors: { offset: (document.querySelector('.case-nav') ? -60 : -96) * parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 }, lerp: 0.085 });
 window.lenis = lenis;
 
 const SPRING = { type: 'spring', stiffness: 170, damping: 24, mass: 1 };
